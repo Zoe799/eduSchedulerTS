@@ -1,0 +1,2996 @@
+/* =========================================================
+   Global
+   ========================================================= */
+
+body {
+    margin: 0;
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background: #f5f6f8;
+    color: #222;
+}
+
+
+/* =========================================================
+   Top Bar
+   ========================================================= */
+
+.topbar {
+    height: 60px;
+
+    background: white;
+
+    border-bottom: 1px solid #ddd;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 30px;
+
+    box-sizing: border-box;
+}
+
+
+.logo {
+    font-size: 20px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+.main-nav {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    margin-left: 30px;
+}
+
+
+.main-nav a {
+    color: #666;
+
+    text-decoration: none;
+
+    font-size: 13px;
+}
+
+
+.main-nav a:hover {
+    color: #222;
+}
+
+
+/* =========================================================
+   Main Container
+   ========================================================= */
+
+.container {
+    max-width: 1500px;
+
+    margin: 30px auto;
+
+    padding: 0 20px;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   Schedule Header
+   ========================================================= */
+
+.schedule-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 25px;
+
+    gap: 20px;
+}
+
+
+.schedule-header h1 {
+    margin: 0;
+}
+
+
+.week-range {
+    margin-top: 5px;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+
+.date-selector input {
+    padding: 8px 10px;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+
+    font-family: inherit;
+    min-width: 0;
+}
+
+
+.date-selector button {
+    padding: 8px 15px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #222;
+    color: white;
+
+    cursor: pointer;
+}
+
+
+.date-selector button:hover {
+    opacity: 0.85;
+}
+
+
+/* =========================================================
+   Add Course Button
+   ========================================================= */
+
+.add-course-button {
+    padding: 8px 12px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #222;
+    color: white;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.add-course-button:hover {
+    opacity: 0.85;
+}
+
+
+/* =========================================================
+   Weekly Columns
+   ========================================================= */
+
+.weekly-columns {
+    display: grid;
+
+    grid-template-columns:
+        repeat(6, minmax(0, 1fr));
+
+    gap: 8px;
+
+    align-items: start;
+
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+.day-column {
+    min-width: 0;
+}
+
+
+/* =========================================================
+   Day Header
+   ========================================================= */
+
+.day-header {
+    padding: 12px;
+
+    text-align: center;
+
+    background: white;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    margin-bottom: 8px;
+
+    box-sizing: border-box;
+}
+
+
+.day-name {
+    font-size: 15px;
+
+    font-weight: 600;
+}
+
+
+.day-date {
+    margin-top: 4px;
+
+    font-size: 12px;
+
+    color: #777;
+}
+
+
+/* =========================================================
+   Day Courses
+   ========================================================= */
+
+.day-courses {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.exception-scope-options {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.exception-scope-options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.exception-scope-options input[type="radio"] {
+    margin: 0;
+}
+/* =========================================================
+   Course Card
+   ========================================================= */
+
+.course-block {
+    position: relative;
+
+    background: var(--school-background);
+
+    border: 1px solid #d9dee5;
+
+    border-left: 4px solid var(--school-border);
+
+    border-radius: 7px;
+
+    /*
+       Extra right padding leaves room
+       for Edit / Delete buttons.
+    */
+    padding: 9px 30px 9px 10px;
+
+    margin-bottom: 10px;
+
+    box-sizing: border-box;
+}
+
+
+.course-block:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   Course Card Actions
+   ========================================================= */
+
+.course-card-actions {
+    position: absolute;
+
+    top: 5px;
+    right: 5px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 1px;
+
+    z-index: 10;
+}
+
+
+.course-action-button {
+    width: 18px;
+    height: 18px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: inherit;
+
+    font-size: 15px;
+    line-height: 18px;
+
+    cursor: pointer;
+
+    opacity: 0.45;
+}
+
+
+.course-action-button:hover {
+    opacity: 1;
+}
+
+
+/* Edit */
+
+.edit-course-button {
+    color: #777;
+}
+
+
+.edit-course-button:hover {
+    background: #f0f0f0;
+
+    color: #333;
+}
+
+
+/* Delete */
+
+.delete-course-button {
+    color: #999;
+}
+
+
+.delete-course-button:hover {
+    background: #ffecec;
+
+    color: #c33;
+}
+
+
+/* =========================================================
+   Course Information
+   ========================================================= */
+
+.course-school {
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: #666;
+
+    margin-bottom: 3px;
+}
+
+
+.course-name {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.35;
+
+    margin-bottom: 5px;
+}
+
+
+.course-time {
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #444;
+
+    margin-bottom: 7px;
+}
+
+
+.course-details {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 5px 10px;
+
+    font-size: 11px;
+
+    color: #777;
+
+    margin-bottom: 10px;
+}
+
+
+/* =========================================================
+   Teacher Section
+   ========================================================= */
+
+.teacher-section {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+
+.teacher-row {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+}
+
+
+.teacher-row label {
+    width: 22px;
+
+    flex-shrink: 0;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #666;
+}
+
+
+.teacher-row select {
+    flex: 1;
+
+    min-width: 0;
+
+    padding: 5px 6px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 5px;
+
+    background: white;
+
+    font-size: 12px;
+
+    font-family: inherit;
+}
+
+
+/* =========================================================
+   Add Teacher
+   ========================================================= */
+
+.add-teacher-button {
+    margin-top: 6px;
+
+    padding: 5px 8px;
+
+    border: 1px dashed #bbb;
+
+    border-radius: 5px;
+
+    background: white;
+
+    color: #777;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+
+.add-teacher-button:hover {
+    background: #f5f5f5;
+
+    color: #333;
+}
+
+
+/* =========================================================
+   Inherited Assignment
+   ========================================================= */
+
+.inherited-label {
+    margin-top: 6px;
+
+    margin-bottom: 5px;
+
+    font-size: 10px;
+
+    color: #888;
+
+    font-style: italic;
+}
+
+
+/* =========================================================
+   Teacher Conflicts
+   ========================================================= */
+
+.teacher-conflicts {
+    margin-top: 10px;
+}
+
+
+.conflict-warning {
+    padding: 8px 10px;
+
+    border: 1px solid #e0b84c;
+
+    border-radius: 6px;
+
+    background: #fff8df;
+
+    color: #7a5a00;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.conflict-details {
+    margin-top: 4px;
+
+    font-weight: 400;
+
+    line-height: 1.4;
+}
+
+
+.conflict-details strong {
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   Teacher Leave Warnings
+   ========================================================= */
+
+.teacher-leave-warnings {
+    margin-top: 8px;
+}
+
+
+.leave-warning {
+    padding: 8px 10px;
+
+    border: 1px solid #d9a441;
+
+    border-radius: 6px;
+
+    background: #fff4d6;
+
+    color: #7a5200;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.leave-details {
+    margin-top: 4px;
+
+    font-weight: 400;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   Holiday / Calendar
+   ========================================================= */
+
+.holiday-cell {
+    background: #fffaf0;
+}
+
+
+.holiday-label {
+    padding: 6px 8px;
+
+    margin-bottom: 8px;
+
+    border-radius: 5px;
+
+    background: #fff3cd;
+
+    color: #856404;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.calendar-event {
+    padding: 6px 8px;
+
+    margin-bottom: 8px;
+
+    border-radius: 5px;
+
+    background: #f0f0f0;
+
+    color: #666;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.cancelled {
+    opacity: 0.45;
+}
+
+
+/* =========================================================
+   Empty Cell
+   ========================================================= */
+
+.empty-cell {
+    min-height: 100px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #ccc;
+
+    background: white;
+
+    border: 1px solid #eee;
+
+    border-radius: 7px;
+}
+
+
+/* =========================================================
+   Save Area
+   ========================================================= */
+
+.save-area {
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 15px;
+}
+
+
+.save-button {
+    padding: 10px 20px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #222;
+
+    color: white;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.save-button:hover {
+    opacity: 0.85;
+}
+
+
+/* =========================================================
+   Course Edit
+   ========================================================= */
+
+.course-edit {
+    margin-top: 4px;
+}
+
+
+.course-edit-field {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    margin-bottom: 7px;
+}
+
+
+.course-edit-field label {
+    font-size: 10px;
+
+    font-weight: 600;
+
+    color: #666;
+}
+
+
+.course-edit-field input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 5px 6px;
+
+    border: 1px solid #bbb;
+
+    border-radius: 5px;
+
+    background: white;
+
+    font-size: 12px;
+
+    font-family: inherit;
+}
+
+
+.course-edit-field input:focus {
+    outline: none;
+
+    border-color: #777;
+}
+
+
+.course-edit-time-row {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 6px;
+}
+
+
+.course-edit-actions {
+    display: flex;
+
+    gap: 5px;
+
+    margin-top: 8px;
+}
+
+
+.course-save-button {
+    padding: 5px 10px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: #222;
+
+    color: white;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+
+.course-save-button:hover {
+    opacity: 0.85;
+}
+
+
+.course-save-button:disabled {
+    opacity: 0.5;
+
+    cursor: default;
+}
+
+
+.course-cancel-button {
+    padding: 5px 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 5px;
+
+    background: white;
+
+    color: #555;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+
+.course-cancel-button:hover {
+    background: #f5f5f5;
+}
+
+
+.course-edit-message {
+    margin-top: 6px;
+
+    font-size: 10px;
+
+    line-height: 1.3;
+}
+
+
+.course-edit-error {
+    color: #b42318;
+}
+
+
+.course-edit-success {
+    color: #26734d;
+}
+
+
+/* =========================================================
+   Teacher Schedule
+   ========================================================= */
+
+.teacher-schedule-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: flex-end;
+
+    gap: 20px;
+
+    margin-bottom: 25px;
+}
+
+
+.teacher-schedule-header h1 {
+    margin: 0;
+}
+
+
+.teacher-controls {
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.teacher-controls select {
+    min-width: 180px;
+
+    padding: 8px 10px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    font-size: 13px;
+
+    font-family: inherit;
+}
+
+
+.week-navigation button {
+    padding: 8px 15px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #222;
+    color: white;
+
+    cursor: pointer;
+}
+
+.week-navigation button:hover {
+    opacity: 0.85;
+}
+
+
+.teacher-schedule-inherited {
+    margin-top: 7px;
+
+    font-size: 10px;
+
+    color: #888;
+
+    font-style: italic;
+}
+
+
+.teacher-empty-day {
+    min-height: 80px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background: white;
+
+    border: 1px solid #eee;
+
+    border-radius: 7px;
+
+    color: #bbb;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   Teacher Schedule Link
+   ========================================================= */
+
+.teacher-schedule-link {
+    display: inline-block;
+
+    padding: 8px 12px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    color: #333;
+
+    text-decoration: none;
+
+    font-size: 13px;
+}
+
+
+.teacher-schedule-link:hover {
+    background: #f5f5f5;
+}
+
+
+/* =========================================================
+   Teacher List
+   ========================================================= */
+
+/* =========================================================
+   Teacher List
+   ========================================================= */
+
+.teacher-list-header {
+    margin-bottom: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.teacher-list-header h1 {
+    margin: 0 0 6px 0;
+}
+
+
+.teacher-list-header p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+.teacher-list-header-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.teacher-list {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(180px, 1fr)
+        );
+
+    gap: 12px;
+
+    max-width: 900px;
+}
+
+
+.teacher-card {
+    position: relative;
+
+    display: block;
+
+    padding: 15px;
+    padding-right: 38px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: inherit;
+
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s,
+        transform 0.15s;
+}
+
+
+.teacher-card:hover {
+    border-color: #aaa;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
+
+    transform: translateY(-1px);
+}
+
+
+.teacher-card-link {
+    display: block;
+
+    text-decoration: none;
+
+    color: inherit;
+}
+
+
+.teacher-card-name {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #222;
+}
+
+
+.teacher-card-status {
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    color: #888;
+}
+
+
+/* =========================================================
+   Teacher Card Actions
+   ========================================================= */
+
+.teacher-card-actions {
+    position: absolute !important;
+
+    top: 5px !important;
+    right: 5px !important;
+
+    display: none;
+
+    flex-direction: column;
+
+    gap: 1px;
+
+    z-index: 10;
+}
+
+
+.teacher-action-button {
+    width: 18px;
+    height: 18px;
+
+    padding: 0;
+    margin: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: inherit;
+
+    font-size: 15px;
+    line-height: 18px;
+
+    cursor: pointer;
+
+    opacity: 0.45;
+}
+
+
+.teacher-action-button:hover {
+    opacity: 1;
+}
+
+
+.edit-teacher-button {
+    color: #777;
+}
+
+
+.edit-teacher-button:hover {
+    background: #f0f0f0;
+
+    color: #333;
+}
+
+
+.delete-teacher-button {
+    color: #999;
+}
+
+
+.delete-teacher-button:hover {
+    background: #ffecec;
+
+    color: #c33;
+}
+
+
+/* =========================================================
+   Teacher Edit Mode
+   ========================================================= */
+
+.teacher-edit-mode .teacher-card-actions {
+    display: flex;
+}
+
+
+/* =========================================================
+   Teacher Leave / Edit Modal
+   ========================================================= */
+
+/*
+   The outer panel is the dark transparent overlay.
+   The actual white box is .teacher-leave-box.
+*/
+
+.teacher-leave-panel {
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.25);
+
+    z-index: 1000;
+}
+
+
+/* =========================================================
+   Teacher Edit Box
+   ========================================================= */
+
+.teacher-leave-box {
+    width: 420px;
+
+    max-width:
+        calc(100vw - 30px);
+
+    max-height:
+        calc(100vh - 40px);
+
+    overflow-y: auto;
+
+    padding: 22px;
+
+    background: white;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.18);
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   Teacher Edit Header
+   ========================================================= */
+
+.teacher-leave-box .panel-title {
+    margin-bottom: 20px;
+
+    font-size: 20px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   Teacher Working Days
+   ========================================================= */
+
+.teacher-workdays-section {
+    width: 100%;
+
+    padding-bottom: 18px;
+
+    margin-bottom: 18px;
+
+    border-bottom: 1px solid #eee;
+
+    box-sizing: border-box;
+}
+
+
+.teacher-section-title {
+    margin-bottom: 10px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #555;
+}
+
+
+.teacher-workdays {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+}
+
+.workday-checkbox {
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 5px;
+
+    margin: 0;
+    padding: 0;
+
+    font-size: 13px;
+    line-height: 1.2;
+
+    color: #444;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+}
+.workday-checkbox input[type="checkbox"] {
+    display: block;
+
+    width: 14px;
+    height: 14px;
+
+    margin: 0;
+    padding: 0;
+
+    flex-shrink: 0;
+
+    cursor: pointer;
+}
+
+.workday-checkbox input {
+    margin: 0;
+
+    cursor: pointer;
+}
+
+
+.save-workdays-button {
+    margin-top: 12px;
+
+    padding: 7px 11px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    color: #444;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.save-workdays-button:hover {
+    background: #f5f5f5;
+
+    color: #222;
+}
+
+
+/*
+   If the button is using the existing
+   add-course-save class instead.
+*/
+
+.teacher-workdays-section .add-course-save {
+    margin-top: 12px;
+}
+
+
+/* =========================================================
+   Teacher Leave
+   ========================================================= */
+
+.teacher-leave-section {
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+.teacher-leave-section-title {
+    margin-bottom: 8px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #555;
+}
+
+
+.teacher-leave-existing {
+    margin-bottom: 5px;
+}
+
+
+.teacher-leave-item {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 8px 9px;
+
+    margin-bottom: 6px;
+
+    border: 1px solid #eee;
+
+    border-radius: 6px;
+
+    background: #fafafa;
+
+    box-sizing: border-box;
+}
+
+
+.teacher-leave-item-info {
+    min-width: 0;
+}
+
+
+.teacher-leave-dates {
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #444;
+}
+
+
+.teacher-leave-note {
+    margin-top: 3px;
+
+    font-size: 11px;
+
+    color: #888;
+}
+
+
+.teacher-leave-delete-button {
+    flex-shrink: 0;
+
+    width: 20px;
+    height: 20px;
+
+    padding: 0;
+
+    border: none;
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #999;
+
+    font-size: 15px;
+
+    line-height: 20px;
+
+    cursor: pointer;
+
+    opacity: 0.6;
+}
+
+
+.teacher-leave-delete-button:hover {
+    background: #ffecec;
+
+    color: #c33;
+
+    opacity: 1;
+}
+
+
+.teacher-leave-empty {
+    padding: 10px;
+
+    border: 1px dashed #ddd;
+
+    border-radius: 6px;
+
+    color: #aaa;
+
+    font-size: 11px;
+
+    text-align: center;
+}
+
+
+.teacher-leave-divider {
+    height: 1px;
+
+    margin: 18px 0;
+
+    background: #eee;
+}
+
+
+/* =========================================================
+   Teacher Leave Form
+   ========================================================= */
+
+.teacher-leave-form {
+    width: 100%;
+
+    box-sizing: border-box;
+}
+
+
+.teacher-leave-form .form-row {
+    display: flex;
+
+    gap: 10px;
+
+    width: 100%;
+}
+
+
+.teacher-leave-form .form-group {
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    min-width: 0;
+
+    gap: 4px;
+
+    margin-bottom: 10px;
+}
+
+
+.teacher-leave-form label {
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: #666;
+}
+
+
+.teacher-leave-form input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 7px 8px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    font-family: inherit;
+
+    font-size: 12px;
+}
+
+
+.teacher-leave-form input:focus {
+    outline: none;
+
+    border-color: #777;
+}
+
+
+.teacher-leave-form .panel-actions {
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 12px;
+}
+
+
+/* =========================================================
+   Teacher Edit Buttons
+   ========================================================= */
+
+.teacher-leave-box .add-course-save {
+    padding: 7px 13px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #222;
+
+    color: white;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.teacher-leave-box .add-course-save:hover {
+    opacity: 0.85;
+}
+
+
+.teacher-leave-box .add-course-cancel {
+    padding: 7px 13px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    color: #555;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.teacher-leave-box .add-course-cancel:hover {
+    background: #f5f5f5;
+}
+
+
+/* =========================================================
+   Responsive - Teacher List
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .teacher-list-header {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .teacher-list-header-actions {
+        justify-content: flex-end;
+    }
+
+
+    .teacher-leave-box {
+        width: 420px;
+
+        max-width:
+            calc(100vw - 30px);
+
+        padding: 18px;
+    }
+
+
+    .teacher-leave-form .form-row {
+        flex-direction: column;
+
+        gap: 0;
+    }
+
+}
+
+
+.add-school-box {
+    width: 360px;
+
+    max-width:
+        calc(100vw - 30px);
+
+    padding: 22px;
+
+    background: white;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.18);
+
+    box-sizing: border-box;
+}
+
+
+/* Modal Header */
+
+.add-course-header {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    margin-bottom: 20px;
+}
+
+
+.add-course-header h2 {
+    margin: 0 0 5px 0;
+
+    font-size: 20px;
+}
+
+
+.add-course-header p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 12px;
+}
+
+
+.close-course-button {
+    width: 28px;
+    height: 28px;
+
+    border: none;
+
+    border-radius: 5px;
+
+    background: #f5f5f5;
+
+    color: #555;
+
+    font-size: 20px;
+
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+
+.close-course-button:hover {
+    background: #eee;
+}
+
+
+/* Modal Fields */
+
+.add-course-field {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    margin-bottom: 12px;
+}
+
+
+.add-course-field label {
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: #666;
+}
+
+
+.add-course-field input,
+.add-course-field select {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 7px 8px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    font-family: inherit;
+
+    font-size: 12px;
+}
+
+
+.add-course-field input:focus,
+.add-course-field select:focus {
+    outline: none;
+
+    border-color: #777;
+}
+
+
+.add-course-time-row {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+}
+
+
+/* School Selector */
+
+.school-select-row {
+    display: flex;
+
+    gap: 6px;
+}
+
+
+.school-select-row select {
+    flex: 1;
+}
+
+
+.add-school-button {
+    flex-shrink: 0;
+
+    padding: 7px 9px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    color: #555;
+
+    font-size: 11px;
+
+    cursor: pointer;
+}
+
+
+.add-school-button:hover {
+    background: #f5f5f5;
+
+    color: #222;
+}
+
+
+/* Modal Buttons */
+
+.add-course-actions {
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 18px;
+}
+
+
+.add-course-save-button {
+    padding: 7px 13px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background: #222;
+
+    color: white;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.add-course-save-button:hover {
+    opacity: 0.85;
+}
+
+
+.add-course-save-button:disabled {
+    opacity: 0.5;
+
+    cursor: default;
+}
+
+
+.add-course-cancel-button {
+    padding: 7px 13px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    color: #555;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+
+.add-course-cancel-button:hover {
+    background: #f5f5f5;
+}
+
+
+/* Modal Messages */
+
+.add-course-message {
+    margin-top: 10px;
+
+    font-size: 11px;
+
+    line-height: 1.4;
+}
+
+
+.add-course-error {
+    color: #b42318;
+}
+
+
+.add-course-success {
+    color: #26734d;
+}
+
+
+/* =========================================================
+   Responsive
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+    .teacher-schedule-header,
+    .view-schedule-header {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .teacher-controls,
+    .view-controls {
+        justify-content: space-between;
+    }
+
+}
+
+
+@media (max-width: 800px) {
+
+    .weekly-columns {
+        grid-template-columns: 1fr;
+    }
+
+
+    .teacher-controls,
+    .view-controls {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .teacher-controls select {
+        width: 100%;
+    }
+
+
+    .view-date-selector {
+        width: 100%;
+    }
+
+
+    .view-date-selector input {
+        flex: 1;
+    }
+
+
+    .week-navigation,
+    .view-navigation {
+        justify-content: space-between;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .topbar {
+        padding: 0 15px;
+    }
+
+
+    .main-nav {
+        gap: 10px;
+
+        margin-left: 15px;
+    }
+
+
+    .main-nav a {
+        font-size: 12px;
+    }
+
+
+    .teacher-list {
+        grid-template-columns: 1fr;
+    }
+
+
+    .schedule-header {
+        flex-direction: column;
+
+        align-items: stretch;
+    }
+
+
+    .date-selector {
+        width: 100%;
+    }
+
+}
+
+/* =========================================================
+   Teacher List
+   ========================================================= */
+
+.teacher-list-header {
+    margin-bottom: 25px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+
+.teacher-list-header h1 {
+    margin: 0 0 6px 0;
+}
+
+
+.teacher-list-header p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+.teacher-list {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(180px, 1fr)
+        );
+
+    gap: 12px;
+
+    max-width: 900px;
+}
+
+
+.teacher-card {
+    position: relative;
+
+    display: block;
+
+    padding: 15px;
+    padding-right: 38px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    background: white;
+
+    color: inherit;
+
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s,
+        transform 0.15s;
+}
+
+
+.teacher-card:hover {
+    border-color: #aaa;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
+
+    transform: translateY(-1px);
+}
+
+
+.teacher-card-link {
+    display: block;
+
+    text-decoration: none;
+
+    color: inherit;
+}
+
+
+.teacher-card-name {
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: #222;
+}
+
+
+.teacher-card-status {
+    margin-top: 5px;
+
+    font-size: 11px;
+
+    color: #888;
+}
+
+
+/* =========================================================
+   Teacher Card Actions
+   ========================================================= */
+
+.teacher-card-actions {
+    position: absolute !important;
+
+    top: 5px !important;
+    right: 5px !important;
+
+    display: none;
+
+    flex-direction: column;
+
+    gap: 1px;
+
+    z-index: 10;
+}
+
+
+.teacher-action-button {
+    width: 18px;
+    height: 18px;
+
+    padding: 0;
+    margin: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: inherit;
+
+    font-size: 15px;
+    line-height: 18px;
+
+    cursor: pointer;
+
+    opacity: 0.45;
+}
+
+
+.teacher-action-button:hover {
+    opacity: 1;
+}
+
+
+.edit-teacher-button {
+    color: #777;
+}
+
+
+.edit-teacher-button:hover {
+    background: #f0f0f0;
+
+    color: #333;
+}
+
+
+.delete-teacher-button {
+    color: #999;
+}
+
+
+.delete-teacher-button:hover {
+    background: #ffecec;
+
+    color: #c33;
+}
+
+/* =========================================================
+   Teacher Leave
+   ========================================================= */
+
+.teacher-leave-box {
+    width: 420px;
+    max-width: calc(100vw - 30px);
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+}
+
+
+.teacher-leave-section-title {
+    margin-bottom: 8px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #555;
+}
+
+
+.teacher-leave-existing {
+    margin-bottom: 5px;
+}
+
+
+.teacher-leave-item {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 8px 9px;
+
+    margin-bottom: 6px;
+
+    border: 1px solid #eee;
+    border-radius: 6px;
+
+    background: #fafafa;
+}
+
+
+.teacher-leave-item-info {
+    min-width: 0;
+}
+
+
+.teacher-leave-dates {
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #444;
+}
+
+
+.teacher-leave-note {
+    margin-top: 3px;
+
+    font-size: 11px;
+
+    color: #888;
+}
+
+
+.teacher-leave-delete-button {
+    flex-shrink: 0;
+
+    width: 20px;
+    height: 20px;
+
+    padding: 0;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #999;
+
+    font-size: 15px;
+    line-height: 20px;
+
+    cursor: pointer;
+
+    opacity: 0.6;
+}
+
+
+.teacher-leave-delete-button:hover {
+    background: #ffecec;
+
+    color: #c33;
+
+    opacity: 1;
+}
+
+
+.teacher-leave-empty {
+    padding: 10px;
+
+    border: 1px dashed #ddd;
+
+    border-radius: 6px;
+
+    color: #aaa;
+
+    font-size: 11px;
+
+    text-align: center;
+}
+
+
+.teacher-leave-divider {
+    height: 1px;
+
+    margin: 18px 0;
+
+    background: #eee;
+}
+
+.teacher-edit-mode .teacher-card-actions {
+    display: flex;
+}
+
+/* =========================================================
+   View Schedule
+   ========================================================= */
+
+.view-schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 12px;
+}
+
+.view-schedule-header > div:first-child {
+    min-width: 0;
+}
+
+.view-schedule-header h1 {
+    margin: 0;
+}
+
+.week-range {
+    margin-top: 6px;
+    color: #777;
+    font-size: 18px;
+}
+
+
+/* ---------------------------------------------------------
+   View Controls
+   --------------------------------------------------------- */
+
+.view-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.view-date-selector {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.view-date-selector input[type="date"] {
+    height: 32px;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+.view-date-selector button,
+.view-navigation button {
+    height: 32px;
+    padding: 0 12px;
+    box-sizing: border-box;
+}
+
+.view-navigation {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+
+/* ---------------------------------------------------------
+   View Weekly Columns
+   --------------------------------------------------------- */
+
+.view-weekly-columns {
+    margin-top: 0;
+}
+
+
+/* ---------------------------------------------------------
+   View Course
+   --------------------------------------------------------- */
+
+.view-course-block {
+    position: relative;
+}
+
+
+/* ---------------------------------------------------------
+   Teachers
+   --------------------------------------------------------- */
+
+.view-teachers,
+.view-unassigned {
+    margin-top: 14px;
+    font-size: 16px;
+    line-height: 1.35;
+    color: #222;
+}
+
+.view-teacher-label {
+    font-weight: 600;
+}
+
+.view-unassigned {
+    color: #444;
+}
+
+
+/* ---------------------------------------------------------
+   Inherited
+   --------------------------------------------------------- */
+
+.inherited-label {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #777;
+}
+
+
+/* ---------------------------------------------------------
+   Responsive
+   --------------------------------------------------------- */
+
+@media (max-width: 900px) {
+
+    .view-schedule-header {
+        align-items: flex-start;
+    }
+
+    .view-controls {
+        align-items: flex-start;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .view-schedule-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .view-controls {
+        align-items: flex-start;
+    }
+}
+
+/* =========================================================
+   Add Course / Modal Panels
+   ========================================================= */
+
+.add-course-panel {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.25);
+
+    z-index: 1000;
+}
+
+.add-course-box,
+.add-school-box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+    padding: 24px;
+    width: 500px;
+    max-width: calc(100vw - 40px);
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   Add Teacher Modal
+   ========================================================= */
+
+.add-teacher-box {
+    width: 420px;
+    max-width: calc(100vw - 40px);
+
+    background: #fff;
+    border-radius: 12px;
+
+    padding: 24px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.add-teacher-box .panel-title {
+    font-size: 20px;
+    font-weight: 600;
+
+    margin-bottom: 24px;
+}
+
+.add-teacher-box .form-group {
+    margin-bottom: 18px;
+}
+
+.add-teacher-box .form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.add-teacher-box .form-group input {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d9dce1;
+    border-radius: 7px;
+
+    background: #fff;
+
+    font-size: 14px;
+
+    outline: none;
+}
+
+.add-teacher-box .form-group input:focus {
+    border-color: #888;
+}
+
+.add-teacher-box .panel-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+
+    margin-top: 24px;
+}
+
+
+/* .schedule-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: nowrap;
+} */
+.schedule-controls {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  position: relative;
+  z-index: 10;
+}
+
+.date-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.week-navigation {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.schedule-controls .add-course-button {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* =========================================================
+   Teacher Working Day Warnings
+   ========================================================= */
+
+.teacher-workday-warnings {
+    margin-top: 8px;
+}
+
+
+.workday-warning {
+    padding: 8px 10px;
+
+    border: 1px solid #d9a441;
+
+    border-radius: 6px;
+
+    background: #fff4d6;
+
+    color: #7a5200;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+.workday-details {
+    margin-top: 4px;
+
+    font-weight: 400;
+
+    line-height: 1.4;
+}
+
+.school-holiday-box {
+    width: 700px;
+    max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
+
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+
+    box-sizing: border-box;
+}
+
+
+.holiday-date-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+
+.school-holiday-existing {
+    margin-top: 22px;
+}
+
+/* Section title */
+
+.school-holiday-existing h3 {
+    margin: 0 0 10px 0;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #222;
+}
+
+.school-holiday-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    min-height: 48px;
+    padding: 8px 10px;
+
+    margin-bottom: 7px;
+
+    background: #fff;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+
+/* Holiday information */
+
+.school-holiday-info {
+    min-width: 0;
+}
+
+.school-holiday-info strong {
+    font-size: 14px;
+}
+
+.school-holiday-info span {
+    font-size: 13px;
+    color: #666;
+}
+
+/* Holiday name */
+
+.school-holiday-name {
+    font-size: 13px;
+    font-weight: 600;
+
+    line-height: 18px;
+
+    color: #333;
+}
+
+
+/* Date + school */
+
+.school-holiday-details {
+    display: flex;
+    gap: 8px;
+
+    margin-top: 1px;
+
+    font-size: 12px;
+    line-height: 16px;
+
+    color: #777;
+}
+
+
+/* Delete button */
+
+.school-holiday-delete-button {
+    flex-shrink: 0;
+
+    padding: 5px 10px;
+
+    border: 1px solid #bbb;
+    border-radius: 5px;
+
+    background: #fff;
+
+    color: #444;
+
+    font-size: 12px;
+    font-weight: 500;
+
+    cursor: pointer;
+}
+
+.school-holiday-delete-button:hover {
+    background: #f5f5f5;
+}
+
+
+/* Empty state */
+
+.school-holiday-empty {
+    padding: 10px 12px;
+
+    border: 1px dashed #ccc;
+    border-radius: 6px;
+
+    background: #fafafa;
+
+    color: #777;
+
+    font-size: 12px;
+}
+
+@media (max-width: 600px) {
+
+    .holiday-date-row {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+.free-teachers {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: #F8FAFC;
+    border: 1px dashed #CBD5E1;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.free-teachers-title {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+}
+
+.free-teachers-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.free-teacher-chip {
+    display: inline-block;
+    padding: 2px 6px;
+    background: #E2E8F0;
+    border-radius: 4px;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.free-teachers-empty {
+    color: #94A3B8;
+    font-style: italic;
+}
+
+.add-course-date-row,
+.add-course-time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.course-edit-date-row,
+.course-edit-time-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.schedule-action-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  flex: 0 0 auto;
+}
+
+/* @media (max-width: 600px) {
+
+    .schedule-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .schedule-action-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .date-selector {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .date-selector input {
+        min-width: 0;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .week-navigation {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    .week-navigation button {
+        width: 100%;
+    }
+} */
+
+.schedule-action-row button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.week-navigation button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+
+  .schedule-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Manage Schools / Edit School Holidays / Add Course */
+  .schedule-action-row {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .schedule-action-row button {
+    width: 100%;
+    min-width: 0;
+    white-space: normal;
+  }
+
+  /* Date + Go */
+  .date-selector {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .date-selector input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .date-selector button {
+    flex: 0 0 auto;
+  }
+
+  /* Previous / Today / Next */
+  .week-navigation {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+
+  .week-navigation button {
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+}
+
+.manage-schools-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+
+  max-height: 55vh;
+  overflow-y: auto;
+
+  padding-right: 5px;
+}
+
+.manage-school-row {
+  display: grid;
+  grid-template-columns: 1fr 110px 45px 45px;
+  align-items: center;
+  gap: 8px;
+
+  padding: 6px 10px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  background: #fafafa;
+}
+
+.manage-school-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.manage-school-status {
+  width: 100%;
+  padding: 5px 7px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  background: white;
+  font-size: 13px;
+}
+
+.manage-school-background,
+.manage-school-border {
+  width: 34px;
+  height: 28px;
+
+  padding: 2px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  background: white;
+  cursor: pointer;
+}
