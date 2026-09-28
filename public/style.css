@@ -2474,6 +2474,11 @@ body {
     z-index: 1000;
 }
 
+.add-course-box {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
 .add-course-box,
 .add-school-box {
     background: #fff;
