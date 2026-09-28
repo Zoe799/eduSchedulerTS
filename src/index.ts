@@ -2812,7 +2812,6 @@ export default {
 
 
         if (
-          workDays.length > 0 &&
           !workDays.includes(
             String(weekday)
           )
