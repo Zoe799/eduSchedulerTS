@@ -1107,7 +1107,8 @@ export default {
 
     const teacherId =
       Number(teacherMatch[1]);
-
+    const printMode =
+      url.searchParams.get("print") === "1";
     // =========================================================
     // 1. Determine selected date range
     // =========================================================
@@ -1601,7 +1602,8 @@ export default {
             school_id,
             course_id,
             start_date,
-            end_date
+            end_date,
+            reason
           FROM schedule_exceptions
           WHERE start_date <= ?
             AND end_date >= ?
@@ -1789,7 +1791,9 @@ export default {
 
           course_name:
             course.course_name,
-
+          
+          start_date: course.start_date,
+          end_date: course.end_date,
           day_of_week:
             course.day_of_week,
 
@@ -1895,6 +1899,20 @@ export default {
     // =========================================================
     // 12. Render
     // =========================================================
+
+    if (printMode) {
+
+      return html(
+        renderTeacherPrintPage({
+          teacher,
+          days,
+          exceptions,
+          range_start: rangeStart,
+          range_end: rangeEnd
+        })
+      );
+
+    }
 
     return html(
       renderTeacherSchedulePage({
@@ -5647,6 +5665,1153 @@ function renderTeacherListPage(data: {
   `);
 }
 
+// =========================================================
+// Teacher Print View
+// =========================================================
+
+function renderTeacherPrintPage({
+  teacher,
+  days,
+  exceptions,
+  range_start,
+  range_end
+}: {
+  teacher: any;
+  days: any[];
+  exceptions: any[];
+  range_start: Date;
+  range_end: Date;
+}): string {
+
+  const dayNames = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
+
+
+  // =======================================================
+  // Date helpers
+  // =======================================================
+
+  function formatLongDate(
+    date: Date
+  ): string {
+
+    return date.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }
+    );
+
+  }
+
+
+  function formatShortDate(
+    dateString: string
+  ): string {
+
+    const date =
+      new Date(
+        dateString + "T12:00:00"
+      );
+
+    return date.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric"
+      }
+    );
+
+  }
+
+
+  function formatCoursePeriod(
+    start: string | null,
+    end: string | null
+  ): string {
+
+    if (!start && !end) {
+      return "Not specified";
+    }
+
+    if (!start) {
+      return "Until " +
+        formatShortDate(end!);
+    }
+
+    if (!end) {
+      return "From " +
+        formatShortDate(start);
+    }
+
+    return (
+      formatShortDate(start) +
+      " – " +
+      formatShortDate(end)
+    );
+
+  }
+
+
+  // =======================================================
+  // Get exception dates for one course
+  // =======================================================
+
+  function getExceptionDates(
+    course: any
+  ): {
+    date: string;
+    reason: string;
+  }[] {
+
+    const result: {
+      date: string;
+      reason: string;
+    }[] = [];
+
+
+    const courseWeekday =
+      Number(course.day_of_week);
+
+
+    const queryStart =
+      formatDate(range_start);
+
+    const queryEnd =
+      formatDate(range_end);
+
+
+    const courseStart =
+      course.start_date ||
+      queryStart;
+
+    const courseEnd =
+      course.end_date ||
+      queryEnd;
+
+
+    // Intersection of:
+    //
+    // query range
+    // course lifetime
+    //
+    const effectiveStart =
+      courseStart > queryStart
+        ? courseStart
+        : queryStart;
+
+    const effectiveEnd =
+      courseEnd < queryEnd
+        ? courseEnd
+        : queryEnd;
+
+
+    if (
+      effectiveStart >
+      effectiveEnd
+    ) {
+      return result;
+    }
+
+
+    for (
+      const exception of exceptions
+    ) {
+
+      const sameSchool =
+        Number(exception.school_id) ===
+        Number(course.school_id);
+
+
+      const sameCourse =
+        exception.course_id === null ||
+        Number(exception.course_id) ===
+        Number(course.id);
+
+
+      if (
+        !sameSchool ||
+        !sameCourse
+      ) {
+        continue;
+      }
+
+
+      let currentDate =
+        new Date(
+          exception.start_date +
+          "T12:00:00"
+        );
+
+
+      const exceptionEnd =
+        new Date(
+          exception.end_date +
+          "T12:00:00"
+        );
+
+
+      while (
+        currentDate <= exceptionEnd
+      ) {
+
+        const dateString =
+          formatDate(currentDate);
+
+
+        // Only dates that:
+        //
+        // 1. are inside the course lifetime
+        // 2. are inside selected print range
+        // 3. match the course weekday
+        //
+        if (
+          dateString >= effectiveStart &&
+          dateString <= effectiveEnd
+        ) {
+
+          const jsDay =
+            currentDate.getDay();
+
+
+          const weekday =
+            jsDay === 0
+              ? 7
+              : jsDay;
+
+
+          if (
+            weekday === courseWeekday
+          ) {
+
+            result.push({
+              date: dateString,
+              reason:
+                exception.reason ||
+                "No class"
+            });
+
+          }
+
+        }
+
+
+        currentDate.setDate(
+          currentDate.getDate() + 1
+        );
+
+      }
+
+    }
+
+
+    // Remove duplicates
+    const unique =
+      new Map<
+        string,
+        {
+          date: string;
+          reason: string;
+        }
+      >();
+
+
+    for (
+      const item of result
+    ) {
+
+      unique.set(
+        item.date,
+        item
+      );
+
+    }
+
+
+    return Array.from(
+      unique.values()
+    ).sort(
+      (a, b) =>
+        a.date.localeCompare(b.date)
+    );
+
+  }
+
+
+  // =======================================================
+  // Compress consecutive weekly exception dates
+  //
+  // Example:
+  //
+  // Sep 30
+  // Oct 7
+  // Oct 14
+  //
+  // becomes:
+  //
+  // Sep 30 – Oct 14
+  // =======================================================
+
+  function compressExceptionDates(
+    items: {
+      date: string;
+      reason: string;
+    }[]
+  ): {
+    start: string;
+    end: string;
+    reason: string;
+  }[] {
+
+    if (
+      items.length === 0
+    ) {
+      return [];
+    }
+
+
+    const result: {
+      start: string;
+      end: string;
+      reason: string;
+    }[] = [];
+
+
+    let group = {
+      start: items[0].date,
+      end: items[0].date,
+      reason: items[0].reason
+    };
+
+
+    for (
+      let i = 1;
+      i < items.length;
+      i++
+    ) {
+
+      const previous =
+        new Date(
+          group.end +
+          "T12:00:00"
+        );
+
+
+      const current =
+        new Date(
+          items[i].date +
+          "T12:00:00"
+        );
+
+
+      const diff =
+        (
+          current.getTime() -
+          previous.getTime()
+        ) /
+        (
+          1000 *
+          60 *
+          60 *
+          24
+        );
+
+
+      if (
+        diff === 7 &&
+        items[i].reason ===
+          group.reason
+      ) {
+
+        group.end =
+          items[i].date;
+
+      } else {
+
+        result.push(group);
+
+        group = {
+          start: items[i].date,
+          end: items[i].date,
+          reason: items[i].reason
+        };
+
+      }
+
+    }
+
+
+    result.push(group);
+
+
+    return result;
+
+  }
+
+
+  // =======================================================
+  // Collect unique courses
+  // =======================================================
+
+  const scheduleMap =
+    new Map<string, any>();
+
+
+  for (
+    const day of days
+  ) {
+
+    if (
+      !day.courses ||
+      day.courses.length === 0
+    ) {
+      continue;
+    }
+
+
+    for (
+      const course of day.courses
+    ) {
+
+      const weekday =
+        Number(course.day_of_week);
+
+
+      const key = [
+        course.id,
+        weekday,
+        course.start_time_display,
+        course.end_time_display,
+        course.school_name,
+        course.course_name,
+        course.classroom || "",
+        course.group_name || ""
+      ].join("|");
+
+
+      if (
+        !scheduleMap.has(key)
+      ) {
+
+        scheduleMap.set(
+          key,
+          {
+            ...course,
+
+            weekday,
+
+            dayName:
+              dayNames[
+                weekday - 1
+              ]
+          }
+        );
+
+      }
+
+    }
+
+  }
+
+
+  const schedule =
+    Array.from(
+      scheduleMap.values()
+    );
+
+
+  // =======================================================
+  // Sort
+  // =======================================================
+
+  schedule.sort(
+    (a, b) => {
+
+      if (
+        a.weekday !==
+        b.weekday
+      ) {
+
+        return (
+          a.weekday -
+          b.weekday
+        );
+
+      }
+
+
+      const timeCompare =
+        a.start_time_display.localeCompare(
+          b.start_time_display
+        );
+
+
+      if (
+        timeCompare !== 0
+      ) {
+
+        return timeCompare;
+
+      }
+
+
+      return (
+        a.school_name || ""
+      ).localeCompare(
+        b.school_name || ""
+      );
+
+    }
+  );
+
+
+  // =======================================================
+  // Build table
+  // =======================================================
+
+  const tableRows =
+    schedule.length > 0
+
+      ? schedule.map(course => {
+
+          const exceptionDates =
+            getExceptionDates(
+              course
+            );
+
+
+          const exceptionGroups =
+            compressExceptionDates(
+              exceptionDates
+            );
+
+
+          const noClassHtml =
+            exceptionGroups.length > 0
+
+              ? `
+                <div class="no-class">
+
+                  <strong>
+                    No class:
+                  </strong>
+
+                  ${exceptionGroups
+                    .map(item => {
+
+                      const dateText =
+                        item.start ===
+                        item.end
+
+                          ? formatShortDate(
+                              item.start
+                            )
+
+                          : (
+                              formatShortDate(
+                                item.start
+                              ) +
+                              " – " +
+                              formatShortDate(
+                                item.end
+                              )
+                            );
+
+
+                      return `
+                        <span class="exception-item">
+                          ${escapeHtml(
+                            dateText
+                          )}
+
+                          ${
+                            item.reason
+                              ? ` — ${escapeHtml(
+                                  item.reason
+                                )}`
+                              : ""
+                          }
+                        </span>
+                      `;
+
+                    })
+                    .join("; ")}
+
+                </div>
+              `
+
+              : "";
+
+
+          return `
+
+            <tr>
+
+              <td class="day-cell">
+
+                ${escapeHtml(
+                  course.dayName
+                )}
+
+              </td>
+
+
+              <td class="time-cell">
+
+                ${escapeHtml(
+                  course.start_time_display
+                )}
+
+                –
+
+                ${escapeHtml(
+                  course.end_time_display
+                )}
+
+              </td>
+
+
+              <td>
+
+                <strong>
+
+                  ${escapeHtml(
+                    course.school_name
+                  )}
+
+                </strong>
+
+              </td>
+
+
+              <td>
+
+                ${escapeHtml(
+                  course.course_name
+                )}
+
+                ${
+                  course.group_name
+                    ? `
+                      <div class="sub-info">
+
+                        ${escapeHtml(
+                          course.group_name
+                        )}
+
+                      </div>
+                    `
+                    : ""
+                }
+
+                ${
+                  course.student_number !==
+                    null &&
+                  course.student_number !==
+                    undefined
+                    ? `
+                      <div class="sub-info">
+
+                        ${escapeHtml(
+                          String(
+                            course.student_number
+                          )
+                        )}
+                        kids
+
+                      </div>
+                    `
+                    : ""
+                }
+
+
+                <div class="course-period">
+
+                  <strong>
+                    Course period:
+                  </strong>
+
+                  ${escapeHtml(
+                    formatCoursePeriod(
+                      course.start_date,
+                      course.end_date
+                    )
+                  )}
+
+                </div>
+
+
+                ${noClassHtml}
+
+              </td>
+
+
+              <td>
+
+                ${
+                  course.classroom
+                    ? escapeHtml(
+                        course.classroom
+                      )
+                    : "—"
+                }
+
+              </td>
+
+            </tr>
+
+          `;
+
+        }).join("")
+
+      : `
+
+          <tr>
+
+            <td
+              colspan="5"
+              class="no-classes"
+            >
+
+              No classes scheduled
+
+            </td>
+
+          </tr>
+
+        `;
+
+
+  // =======================================================
+  // Render page
+  // =======================================================
+
+  return `
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>
+
+    ${escapeHtml(
+      teacher.name
+    )}
+
+    - Teacher Schedule
+
+  </title>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      padding: 32px;
+
+      font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+      color: #222;
+
+      background: white;
+
+    }
+
+
+    .print-container {
+
+      max-width: 1100px;
+
+      margin: 0 auto;
+
+    }
+
+
+    .header {
+
+      display: flex;
+
+      justify-content:
+        space-between;
+
+      align-items:
+        flex-start;
+
+      margin-bottom: 28px;
+
+      border-bottom:
+        2px solid #222;
+
+      padding-bottom: 16px;
+
+    }
+
+
+    .title {
+
+      margin: 0;
+
+      font-size: 28px;
+
+      font-weight: 700;
+
+    }
+
+
+    .date-range {
+
+      margin-top: 6px;
+
+      font-size: 14px;
+
+      color: #666;
+
+    }
+
+
+    .teacher-name {
+
+      text-align: right;
+
+      font-size: 15px;
+
+      color: #555;
+
+    }
+
+
+    table {
+
+      width: 100%;
+
+      border-collapse:
+        collapse;
+
+      font-size: 14px;
+
+    }
+
+
+    th {
+
+      text-align: left;
+
+      padding: 10px 12px;
+
+      background: #f1f1f1;
+
+      border-bottom:
+        2px solid #333;
+
+      font-weight: 700;
+
+    }
+
+
+    td {
+
+      padding: 11px 12px;
+
+      border-bottom:
+        1px solid #ddd;
+
+      vertical-align:
+        top;
+
+    }
+
+
+    .day-cell {
+
+      width: 100px;
+
+      font-weight: 700;
+
+    }
+
+
+    .time-cell {
+
+      width: 130px;
+
+      white-space:
+        nowrap;
+
+      font-weight: 600;
+
+    }
+
+
+    .sub-info {
+
+      margin-top: 4px;
+
+      font-size: 12px;
+
+      color: #777;
+
+    }
+
+
+    .course-period {
+
+      margin-top: 8px;
+
+      font-size: 12px;
+
+      color: #555;
+
+    }
+
+
+    .no-class {
+
+      margin-top: 6px;
+
+      font-size: 12px;
+
+      color: #a33;
+
+      line-height: 1.5;
+
+    }
+
+
+    .exception-item {
+
+      white-space:
+        nowrap;
+
+    }
+
+
+    .no-classes {
+
+      text-align: center;
+
+      padding: 30px;
+
+      color: #777;
+
+    }
+
+
+    .footer {
+
+      margin-top: 24px;
+
+      font-size: 11px;
+
+      color: #888;
+
+      text-align: right;
+
+    }
+
+
+    .print-button {
+
+      position: fixed;
+
+      top: 20px;
+
+      right: 20px;
+
+      padding: 9px 16px;
+
+      border: none;
+
+      border-radius: 6px;
+
+      background: #222;
+
+      color: white;
+
+      cursor: pointer;
+
+      font-size: 13px;
+
+    }
+
+
+    @media print {
+
+      body {
+
+        padding: 0;
+
+      }
+
+
+      .print-container {
+
+        max-width: none;
+
+      }
+
+
+      .print-button {
+
+        display: none;
+
+      }
+
+
+      table {
+
+        page-break-inside:
+          auto;
+
+      }
+
+
+      tr {
+
+        page-break-inside:
+          avoid;
+
+        page-break-after:
+          auto;
+
+      }
+
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+<button
+  class="print-button"
+  onclick="window.print()"
+>
+
+  Print / Save as PDF
+
+</button>
+
+
+<div class="print-container">
+
+
+  <div class="header">
+
+    <div>
+
+      <h1 class="title">
+
+        Teacher Schedule
+
+      </h1>
+
+
+      <div class="date-range">
+
+        ${formatLongDate(
+          range_start
+        )}
+
+        –
+
+        ${formatLongDate(
+          range_end
+        )}
+
+      </div>
+
+    </div>
+
+
+    <div class="teacher-name">
+
+      ${escapeHtml(
+        teacher.name
+      )}
+
+    </div>
+
+  </div>
+
+
+  <table>
+
+    <thead>
+
+      <tr>
+
+        <th>Day</th>
+
+        <th>Time</th>
+
+        <th>School</th>
+
+        <th>Course</th>
+
+        <th>Room</th>
+
+      </tr>
+
+    </thead>
+
+
+    <tbody>
+
+      ${tableRows}
+
+    </tbody>
+
+  </table>
+
+
+  <div class="footer">
+
+    EduScheduler
+
+  </div>
+
+
+</div>
+
+
+</body>
+
+</html>
+
+  `;
+
+}
+
 // ========== 查看教师课表 （teacher/id.html）
 function renderTeacherSchedulePage({
   teacher,
@@ -5937,6 +7102,14 @@ function renderTeacherSchedulePage({
             >
               Go
             </button>
+
+            <a
+              href="/teachers/${teacher_id}?start_date=${formatDate(range_start)}&end_date=${formatDate(range_end)}&print=1"
+              target="_blank"
+              class="print-view-button"
+            >
+              🖨 Print View
+            </a>
           </div>
 
         </div>
