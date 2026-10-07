@@ -17,13 +17,6 @@
 
 > A web-based scheduling system designed for education programs where teachers, courses, and resources are shared across multiple schools.
 
-> 🚀 **Current Version**
->
-> This is the current TypeScript version of EduScheduler, migrated from the original **Python / FastAPI + MySQL** implementation to **TypeScript + Cloudflare Workers + Cloudflare D1**.
->
-> The original Python version is still available as a reference:
->
-> **[EduScheduler – Python / FastAPI + MySQL](https://github.com/Zoe799/EduScheduler)**
 
 ---
 
