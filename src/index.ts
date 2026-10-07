@@ -1324,16 +1324,6 @@ export default {
       }
     }
 
-    console.log(
-      "COURSE TEACHER ROWS:",
-      courseTeacherRows
-    );
-
-    console.log(
-      "COURSE TEACHER MAP:",
-      Array.from(courseTeacherMap.entries())
-    );
-
 
     // =========================================================
     // 7. Weekly assignments
@@ -1362,70 +1352,72 @@ export default {
     const weeklyAssignments =
       weeklyRows as any[];
 
-
     // =========================================================
-    // 8. Exact weekly assignment map
+    // 8. Build exact assignment map
     // =========================================================
 
     const weeklyAssignmentMap =
       new Map<string, number[]>();
 
-    const explicitAssignmentDates =
-      new Set<string>();
-
-    for (
-      const item of weeklyAssignments
-    ) {
+    for (const item of weeklyAssignments) {
 
       const key =
         `${item.course_id}_${item.class_date}`;
 
-      if (
-        !weeklyAssignmentMap.has(key)
-      ) {
-        weeklyAssignmentMap.set(
-          key,
-          []
-        );
+      if (!weeklyAssignmentMap.has(key)) {
+        weeklyAssignmentMap.set(key, []);
       }
 
-      explicitAssignmentDates.add(key);
+      const teacherList =
+        weeklyAssignmentMap.get(key)!;
 
       if (
-        item.teacher_id !== null
+        item.teacher_id !== null &&
+        teacherList.length < 4
       ) {
-
-        const teacherList =
-          weeklyAssignmentMap.get(key)!;
-
-        if (
-          teacherList.length < 4
-        ) {
-          teacherList.push(
-            Number(item.teacher_id)
-          );
-        }
+        teacherList.push(
+          Number(item.teacher_id)
+        );
       }
     }
 
 
     // =========================================================
-    // 9. Inherited assignment map
+    // 9. Build inherited assignment map
+    //
+    // For every course + weekday:
+    // find assignment dates and make each assignment
+    // effective until the next assignment date.
+    //
+    // Example:
+    //
+    // 2026-10-05 -> [3, 1]
+    // 2026-10-12 -> [22, 13]
+    //
+    // Then:
+    //
+    // 2026-10-05 -> [3, 1]
+    // 2026-10-19 -> [22, 13]
+    // 2026-10-26 -> [22, 13]
+    // 2026-11-02 -> [22, 13]
+    // ...
     // =========================================================
 
     const inheritedAssignmentMap =
       new Map<string, number[]>();
 
-    const inheritedAssignmentDate =
-      new Map<string, string>();
 
-    for (
-      const item of weeklyAssignments
-    ) {
+    // Group weekly assignments by course + weekday
+    const assignmentHistory =
+      new Map<string, {
+        date: string;
+        teacherIds: number[];
+      }[]>();
 
-      if (
-        item.class_date >= formatDate(rangeStart)
-      ) {
+
+    for (const item of weeklyAssignments) {
+
+      if (item.teacher_id === null) {
         continue;
       }
 
@@ -1434,54 +1426,168 @@ export default {
           item.class_date + "T12:00:00"
         );
 
-      const weekday = itemDate.getDay();
+      const weekday =
+        itemDate.getDay();
 
+      // Ignore Sunday
       if (weekday === 0) {
         continue;
       }
 
-      const key =
+      const historyKey =
         `${item.course_id}_${weekday}`;
 
-      if (
-        inheritedAssignmentDate.has(key)
-      ) {
-        continue;
+      if (!assignmentHistory.has(historyKey)) {
+        assignmentHistory.set(
+          historyKey,
+          []
+        );
       }
 
-      inheritedAssignmentDate.set(
-        key,
-        item.class_date
-      );
+      const history =
+        assignmentHistory.get(historyKey)!;
 
-      const teacherList: number[] = [];
 
-      for (
-        const other of weeklyAssignments
-      ) {
+      // Find an existing record for the same date
+      let record =
+        history.find(
+          x => x.date === item.class_date
+          );
 
+
+        if (!record) {
+
+          record = {
+            date: item.class_date,
+            teacherIds: []
+          };
+
+          history.push(record);
+        }
+
+
+        // Maximum 4 teachers
         if (
-          other.course_id === item.course_id &&
-          other.class_date === item.class_date &&
-          other.teacher_id !== null
+          record.teacherIds.length < 4
+        ) {
+          record.teacherIds.push(
+            Number(item.teacher_id)
+          );
+        }
+      }
+
+
+      // Sort every course's assignment history
+      // from oldest → newest
+      for (const [
+        historyKey,
+        history
+      ] of assignmentHistory.entries()) {
+
+        history.sort(
+          (a, b) =>
+            a.date.localeCompare(b.date)
+        );
+
+
+        // We need the course id separately
+        const parts =
+          historyKey.split("_");
+
+        const courseId =
+          Number(parts[0]);
+
+
+        // Create inherited entries for
+        // every assignment period.
+        //
+        // IMPORTANT:
+        // We intentionally do NOT create entries
+        // for the assignment date itself.
+        // The exact assignment map handles that.
+        //
+        // The assignment remains effective until
+        // another assignment for the same course
+        // and weekday appears.
+
+        for (
+          let i = 0;
+          i < history.length;
+          i++
         ) {
 
-          if (
-            teacherList.length < 4
+          const current =
+            history[i];
+
+          const next =
+            history[i + 1];
+
+
+          // Determine the first date on which
+          // this assignment should be inherited.
+          //
+          // If there is a next assignment,
+          // inheritance starts from the next week.
+          //
+          // If there is no next assignment,
+          // inheritance continues indefinitely.
+
+          const currentDate =
+            new Date(
+              current.date + "T12:00:00"
+            );
+
+          let inheritedDate =
+            new Date(currentDate);
+
+          inheritedDate.setDate(
+            inheritedDate.getDate() + 7
+          );
+
+
+          while (
+            inheritedDate <= rangeEnd
           ) {
-            teacherList.push(
-              Number(other.teacher_id)
+
+            const dateString =
+              formatDate(inheritedDate);
+
+
+            // Stop when we reach the next
+            // explicit assignment.
+            if (
+              next &&
+              dateString >= next.date
+            ) {
+              break;
+            }
+
+
+            // Only create entries inside
+            // the currently displayed range.
+            if (
+              dateString >=
+                formatDate(rangeStart) &&
+              dateString <=
+                formatDate(rangeEnd)
+            ) {
+
+              const key =
+                `${courseId}_${dateString}`;
+
+              inheritedAssignmentMap.set(
+                key,
+                [...current.teacherIds]
+              );
+            }
+
+
+            inheritedDate.setDate(
+              inheritedDate.getDate() + 7
             );
           }
         }
       }
-
-      inheritedAssignmentMap.set(
-        key,
-        teacherList
-      );
-    }
-
 
     // =========================================================
     // 10. Schedule exceptions
@@ -1592,39 +1698,27 @@ export default {
         const exactKey =
           `${course.id}_${dateString}`;
 
-        const inheritedKey =
-          `${course.id}_${weekday}`;
-
         let teacherIds: number[] = [];
 
         let assignmentSource =
           "default";
 
-
         if (
-          weeklyAssignmentMap.has(
-            exactKey
-          )
+          weeklyAssignmentMap.has(exactKey)
         ) {
 
           teacherIds =
-            weeklyAssignmentMap.get(
-              exactKey
-            ) || [];
+            weeklyAssignmentMap.get(exactKey) || [];
 
           assignmentSource =
             "weekly";
 
         } else if (
-          inheritedAssignmentMap.has(
-            inheritedKey
-          )
+          inheritedAssignmentMap.has(exactKey)
         ) {
 
           teacherIds =
-            inheritedAssignmentMap.get(
-              inheritedKey
-            ) || [];
+            inheritedAssignmentMap.get(exactKey) || [];
 
           assignmentSource =
             "inherited";
@@ -1640,7 +1734,6 @@ export default {
         // -----------------------------------------------------
         // Is selected teacher assigned?
         // -----------------------------------------------------
-
         if (
           !teacherIds.includes(
             teacherId
@@ -1662,7 +1755,6 @@ export default {
         ) {
           continue;
         }
-
 
         // -----------------------------------------------------
         // Course data
@@ -1716,7 +1808,6 @@ export default {
             "#2196f3"
 
         });
-
       }
 
 
