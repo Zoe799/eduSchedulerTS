@@ -1648,7 +1648,6 @@ export default {
       );
     }
 
-
     // =========================================================
     // 11. Build teacher schedule
     // =========================================================
@@ -1683,13 +1682,30 @@ export default {
         const course of courses
       ) {
 
+        // =====================================================
+        // Course must be active on this specific date
+        // =====================================================
+
+        if (
+          course.start_date &&
+          dateString < course.start_date
+        ) {
+          continue;
+        }
+
+        if (
+          course.end_date &&
+          dateString > course.end_date
+        ) {
+          continue;
+        }
+
         if (
           Number(course.day_of_week) !==
           weekday
         ) {
           continue;
         }
-
 
         // -----------------------------------------------------
         // Determine effective teachers
