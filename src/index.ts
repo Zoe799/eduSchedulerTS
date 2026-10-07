@@ -1109,56 +1109,74 @@ export default {
       Number(teacherMatch[1]);
 
     // =========================================================
-    // 1. Selected date
+    // 1. Determine selected date range
     // =========================================================
 
-    const dateParam =
-      url.searchParams.get("date_str");
+    const startDateParam =
+      url.searchParams.get("start_date");
 
-    let selectedDate = new Date();
+    const endDateParam =
+      url.searchParams.get("end_date");
 
-    if (dateParam) {
+    let selectedStartDate = new Date();
+    let selectedEndDate = new Date();
 
+    if (startDateParam) {
       const parsed =
-        new Date(dateParam + "T12:00:00");
+        new Date(startDateParam + "T12:00:00");
 
       if (!isNaN(parsed.getTime())) {
-        selectedDate = parsed;
+        selectedStartDate = parsed;
+      }
+    }
+
+    if (endDateParam) {
+      const parsed =
+        new Date(endDateParam + "T12:00:00");
+
+      if (!isNaN(parsed.getTime())) {
+        selectedEndDate = parsed;
       }
     }
 
 
     // =========================================================
-    // 2. Calculate Monday - Saturday
+    // 2. Calculate full Monday - Saturday range
     // =========================================================
 
-    const dayOfWeek =
-      selectedDate.getDay();
+    const startDayOfWeek =
+      selectedStartDate.getDay();
 
-    const mondayOffset =
-      dayOfWeek === 0
+    const startMondayOffset =
+      startDayOfWeek === 0
         ? -6
-        : 1 - dayOfWeek;
+        : 1 - startDayOfWeek;
 
-    const monday =
-      new Date(selectedDate);
+    const rangeStart =
+      new Date(selectedStartDate);
 
-    monday.setDate(
-      selectedDate.getDate() + mondayOffset
+    rangeStart.setDate(
+      selectedStartDate.getDate() +
+      startMondayOffset
     );
 
-    const saturday =
-      new Date(monday);
 
-    saturday.setDate(
-      monday.getDate() + 5
+    const endDayOfWeek =
+      selectedEndDate.getDay();
+
+    const endMondayOffset =
+      endDayOfWeek === 0
+        ? -6
+        : 1 - endDayOfWeek;
+
+    const rangeEnd =
+      new Date(selectedEndDate);
+
+    rangeEnd.setDate(
+      selectedEndDate.getDate() +
+      endMondayOffset +
+      5
     );
-
-    const weekStart =
-      formatDate(monday);
-
-    const weekEnd =
-      formatDate(saturday);
 
 
     // =========================================================
@@ -1253,8 +1271,8 @@ export default {
             c.course_name
         `)
         .bind(
-          weekEnd,
-          weekStart
+          formatDate(rangeEnd),
+          formatDate(rangeStart)
         )
         .all();
 
@@ -1278,7 +1296,7 @@ export default {
 
     const courseTeacherMap =
       new Map<number, number[]>();
-
+  
     for (
       const row of courseTeacherRows as any[]
     ) {
@@ -1306,6 +1324,16 @@ export default {
       }
     }
 
+    console.log(
+      "COURSE TEACHER ROWS:",
+      courseTeacherRows
+    );
+
+    console.log(
+      "COURSE TEACHER MAP:",
+      Array.from(courseTeacherMap.entries())
+    );
+
 
     // =========================================================
     // 7. Weekly assignments
@@ -1328,7 +1356,7 @@ export default {
             class_date DESC,
             id DESC
         `)
-        .bind(weekEnd)
+        .bind(formatDate(rangeEnd))
         .all();
 
     const weeklyAssignments =
@@ -1396,7 +1424,7 @@ export default {
     ) {
 
       if (
-        item.class_date >= weekStart
+        item.class_date >= formatDate(rangeStart)
       ) {
         continue;
       }
@@ -1406,10 +1434,11 @@ export default {
           item.class_date + "T12:00:00"
         );
 
-      const weekday =
-        itemDate.getDay() === 0
-          ? 6
-          : itemDate.getDay() - 1;
+      const weekday = itemDate.getDay();
+
+      if (weekday === 0) {
+        continue;
+      }
 
       const key =
         `${item.course_id}_${weekday}`;
@@ -1472,8 +1501,8 @@ export default {
             AND end_date >= ?
         `)
         .bind(
-          weekEnd,
-          weekStart
+          formatDate(rangeEnd),
+          formatDate(rangeStart)
         )
         .all();
 
@@ -1520,22 +1549,29 @@ export default {
 
     const days: any[] = [];
 
-    for (let i = 0; i < 6; i++) {
+    const currentDate =
+      new Date(rangeStart);
 
-      const currentDate =
-        new Date(monday);
-
-      currentDate.setDate(
-        monday.getDate() + i
-      );
+    while (
+      currentDate <= rangeEnd
+    ) {
 
       const dateString =
         formatDate(currentDate);
 
-      const weekday =
-        i + 1;
+      if (currentDate.getDay() === 0) {
+        currentDate.setDate(currentDate.getDate() + 1);
+        continue;
+      }
+
+      const weekday = currentDate.getDay();
 
       const dayCourses: any[] = [];
+
+
+      // -------------------------------------------------------
+      // Find courses for this day
+      // -------------------------------------------------------
 
       for (
         const course of courses
@@ -1566,7 +1602,9 @@ export default {
 
 
         if (
-          weeklyAssignmentMap.has(exactKey)
+          weeklyAssignmentMap.has(
+            exactKey
+          )
         ) {
 
           teacherIds =
@@ -1593,15 +1631,11 @@ export default {
 
         } else {
 
-          teacherIds =
-            courseTeacherMap.get(
-              Number(course.id)
-            ) || [];
+          teacherIds = [];
 
           assignmentSource =
             "default";
         }
-
 
         // -----------------------------------------------------
         // Is selected teacher assigned?
@@ -1635,33 +1669,59 @@ export default {
         // -----------------------------------------------------
 
         dayCourses.push({
-          id: course.id,
-          school_id: course.school_id,
-          school_name: course.school_name,
-          course_name: course.course_name,
-          day_of_week: course.day_of_week,
+
+          id:
+            course.id,
+
+          school_id:
+            course.school_id,
+
+          school_name:
+            course.school_name,
+
+          course_name:
+            course.course_name,
+
+          day_of_week:
+            course.day_of_week,
+
           start_time_display:
-            formatTime(course.start_time),
+            formatTime(
+              course.start_time
+            ),
+
           end_time_display:
-            formatTime(course.end_time),
-          classroom: course.classroom,
-          group_name: course.group_name,
+            formatTime(
+              course.end_time
+            ),
+
+          classroom:
+            course.classroom,
+
+          group_name:
+            course.group_name,
+
           student_number:
             course.student_number,
+
           assignment_source:
             assignmentSource,
+
           school_background:
             course.background_color ||
             "#e3f2f2",
+
           school_border:
             course.border_color ||
             "#2196f3"
+
         });
+
       }
 
 
       // -------------------------------------------------------
-      // Sort
+      // Sort courses
       // -------------------------------------------------------
 
       dayCourses.sort(
@@ -1678,6 +1738,7 @@ export default {
             return schoolCompare;
           }
 
+
           const timeCompare =
             a.start_time_display.localeCompare(
               b.start_time_display
@@ -1689,6 +1750,7 @@ export default {
             return timeCompare;
           }
 
+
           return a.course_name.localeCompare(
             b.course_name
           );
@@ -1696,11 +1758,31 @@ export default {
       );
 
 
+      // -------------------------------------------------------
+      // Add this day
+      // -------------------------------------------------------
+
       days.push({
-        date: currentDate,
-        courses: dayCourses
+
+        date:
+          new Date(currentDate),
+
+        courses:
+          dayCourses
+
       });
+
+
+      // -------------------------------------------------------
+      // Move to next day
+      // -------------------------------------------------------
+
+      currentDate.setDate(
+        currentDate.getDate() + 1
+      );
+
     }
+
 
 
     // =========================================================
@@ -1713,12 +1795,12 @@ export default {
         teachers,
         teacher_id: teacherId,
         days,
-        week_dates: days.map(
-          day => day.date
-        ),
-        week_start: monday,
-        week_end: saturday,
-        selected_date: selectedDate
+
+        range_start: rangeStart,
+        range_end: rangeEnd,
+
+        selected_start_date: selectedStartDate,
+        selected_end_date: selectedEndDate
       })
     );
   }
@@ -1998,7 +2080,7 @@ export default {
             teacher_id
         `)
         .bind(
-          weekEnd,
+          weekStart,
           18
         )
         .all();
@@ -5464,19 +5546,19 @@ function renderTeacherSchedulePage({
   teachers,
   teacher_id,
   days,
-  week_dates,
-  week_start,
-  week_end,
-  selected_date
+  range_start,
+  range_end,
+  selected_start_date,
+  selected_end_date
 }: {
   teacher: any;
   teachers: any[];
   teacher_id: number;
   days: any[];
-  week_dates: Date[];
-  week_start: Date;
-  week_end: Date;
-  selected_date: Date;
+  range_start: Date;
+  range_end: Date;
+  selected_start_date: Date;
+  selected_end_date: Date;
 }): string {
 
   const monthNames = [
@@ -5684,10 +5766,6 @@ function renderTeacherSchedulePage({
     .join("");
 
 
-  const selectedDateString =
-    formatDate(selected_date);
-
-
   return renderPage(`
 
     <div class="container">
@@ -5713,17 +5791,6 @@ function renderTeacherSchedulePage({
             ${escapeHtml(teacher.name)}'s Schedule
           </h1>
 
-
-          <div class="week-range">
-
-            ${formatLongDate(week_start)}
-
-            -
-
-            ${formatLongDate(week_end)}
-
-          </div>
-
         </div>
 
 
@@ -5731,43 +5798,38 @@ function renderTeacherSchedulePage({
              Controls
              ========================================= -->
 
-        <div class="teacher-controls">
+        <div class="schedules-controls">
 
-          <select
-            id="teacher-selector"
-            onchange="changeTeacher()"
-          >
+          <div class="date-selector">
 
-            ${teacherOptions}
-
-          </select>
-
-
-          <div class="week-navigation">
-
-            <button
-              type="button"
-              onclick="changeWeek(-7)"
-            >
-              ← Previous
-            </button>
+            <label>
+              From
+              <input
+                type="date"
+                id="start-date"
+                value="${formatDate(selected_start_date)}"
+                onchange="changeDateRange()"
+              >
+            </label>
 
 
-            <button
-              type="button"
-              onclick="goToToday()"
-            >
-              Today
-            </button>
-
+            <label>
+              To
+              <input
+                type="date"
+                id="end-date"
+                value="${formatDate(selected_end_date)}"
+                onchange="changeDateRange()"
+              >
+            </label>
 
             <button
               type="button"
-              onclick="changeWeek(7)"
+              onclick="applyDateRange()"
+              class="date-seclector"
             >
-              Next →
+              Go
             </button>
-
           </div>
 
         </div>
@@ -5789,7 +5851,33 @@ function renderTeacherSchedulePage({
 
 
     <script>
+      function applyDateRange() {
+        const startDate =
+          document.getElementById("start-date").value;
 
+        const endDate =
+          document.getElementById("end-date").value;
+
+        if (!startDate || !endDate) {
+          return;
+        }
+
+        if (endDate < startDate) {
+          alert("End date cannot be before start date.");
+          return;
+        }
+
+        const params = new URLSearchParams();
+
+        params.set("start_date", startDate);
+        params.set("end_date", endDate);
+
+        window.location.href =
+          window.location.pathname +
+          "?" +
+          params.toString();
+      }
+      
       function changeTeacher() {
 
         const selector =
@@ -5800,90 +5888,50 @@ function renderTeacherSchedulePage({
         const teacherId =
           selector.value;
 
-        const date =
-          "${selectedDateString}";
+        const startDate =
+          "${formatDate(selected_start_date)}";
+
+        const endDate =
+          "${formatDate(selected_end_date)}";
 
         window.location.href =
           "/teachers/"
           + teacherId
-          + "?date_str="
-          + date;
+          + "?start_date="
+          + startDate
+          + "&end_date="
+          + endDate;
       }
 
+      function changeDateRange() {
 
-      function changeWeek(days) {
+        const startDate =
+          document.getElementById(
+            "start-date"
+          ).value;
 
-        const currentDate =
-          new Date(
-            "${selectedDateString}T12:00:00"
+        const endDate =
+          document.getElementById(
+            "end-date"
+          ).value;
+
+        if (!startDate || !endDate) {
+          return;
+        }
+
+        if (startDate > endDate) {
+          alert(
+            "The start date cannot be after the end date."
           );
-
-        currentDate.setDate(
-          currentDate.getDate() + days
-        );
-
-
-        const year =
-          currentDate.getFullYear();
-
-        const month =
-          String(
-            currentDate.getMonth() + 1
-          ).padStart(2, "0");
-
-        const day =
-          String(
-            currentDate.getDate()
-          ).padStart(2, "0");
-
-
-        const newDate =
-          year +
-          "-" +
-          month +
-          "-" +
-          day;
-
+          return;
+        }
 
         window.location.href =
           "/teachers/${teacher_id}"
-          + "?date_str="
-          + newDate;
-      }
-
-
-      function goToToday() {
-
-        const today =
-          new Date();
-
-
-        const year =
-          today.getFullYear();
-
-        const month =
-          String(
-            today.getMonth() + 1
-          ).padStart(2, "0");
-
-        const day =
-          String(
-            today.getDate()
-          ).padStart(2, "0");
-
-
-        const todayString =
-          year +
-          "-" +
-          month +
-          "-" +
-          day;
-
-
-        window.location.href =
-          "/teachers/${teacher_id}"
-          + "?date_str="
-          + todayString;
+          + "?start_date="
+          + startDate
+          + "&end_date="
+          + endDate;
       }
 
     </script>
