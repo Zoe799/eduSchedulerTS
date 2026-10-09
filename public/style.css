@@ -3022,3 +3022,52 @@ body {
 .print-view-button:hover {
   background: #f5f5f5;
 }
+
+/* pending teacher */
+.pending-teacher-control {
+  margin-top: 8px;
+}
+
+.pending-teacher-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  color: #4b5563;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease,
+              color 0.15s ease;
+}
+
+.pending-teacher-button:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.pending-teacher-button.is-pending {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.pending-teacher-button.is-pending:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.pending-teacher-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.course-block.pending-teacher-block {
+  outline: 3px solid #fca5a5;
+  outline-offset: -3px;
+}

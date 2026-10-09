@@ -40,7 +40,8 @@ export default {
       url.pathname === "/update-course" ||
       url.pathname === "/delete-course" ||
       url.pathname === "/manage-schools" ||
-      url.pathname === "/update-school"
+      url.pathname === "/update-school" ||
+      url.pathname === "/toggle-pending-teacher"
     ) {
       return handleEdit(request, env);
     }

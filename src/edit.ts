@@ -25,6 +25,68 @@ const SCHOOL_COLOR_PALETTE = [
 
 export async function handleEdit(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
+    // ======== Pending Teacher reminder ========
+    if (
+      url.pathname === "/toggle-pending-teacher" &&
+      request.method === "POST"
+    ) {
+      let body: any;
+
+      try {
+        body = await request.json();
+      } catch {
+        return new Response("Invalid JSON body.", {
+          status: 400
+        });
+      }
+
+      const courseId = Number(body.course_id);
+      const classDate = String(body.class_date || "");
+      const pending = body.pending === true;
+
+      if (
+        !Number.isInteger(courseId) ||
+        courseId <= 0 ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(classDate)
+      ) {
+        return new Response("Invalid course or date.", {
+          status: 400
+        });
+      }
+
+      if (pending) {
+        await env.edu_scheduler_db
+          .prepare(`
+            INSERT OR IGNORE INTO pending_teacher (
+              course_id,
+              class_date
+            )
+            VALUES (?, ?)
+          `)
+          .bind(courseId, classDate)
+          .run();
+      } else {
+        await env.edu_scheduler_db
+          .prepare(`
+            DELETE FROM pending_teacher
+            WHERE course_id = ?
+              AND class_date = ?
+          `)
+          .bind(courseId, classDate)
+          .run();
+      }
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+    }
+
       // ======== 编辑 =============
     if (url.pathname === "/edit") {
 
@@ -77,7 +139,29 @@ export async function handleEdit(request: Request, env: Env): Promise<Response> 
       const weekEnd =
         formatDate(weekDates[5]);
 
+      // --------------------------------------------------
+      // Pending Teacher reminders for this week
+      // --------------------------------------------------
 
+      const {
+        results: pendingTeacherRows
+      } = await env.edu_scheduler_db
+        .prepare(`
+          SELECT course_id, class_date
+          FROM pending_teacher
+          WHERE class_date >= ?
+            AND class_date <= ?
+        `)
+        .bind(weekStart, weekEnd)
+        .all();
+
+      const pendingTeacherSet = new Set<string>();
+
+      for (const row of pendingTeacherRows as any[]) {
+        pendingTeacherSet.add(
+          `${Number(row.course_id)}_${row.class_date}`
+        );
+      }
       // --------------------------------------------------
       // 2. Schools
       // --------------------------------------------------
@@ -819,6 +903,11 @@ export async function handleEdit(request: Request, env: Env): Promise<Response> 
 
             id:
               Number(course.id),
+
+            pending_teacher:
+              pendingTeacherSet.has(
+                `${Number(course.id)}_${dateString}`
+              ),
 
             school_id:
               Number(course.school_id),
@@ -4027,7 +4116,7 @@ function renderEditPage({
 
               return `
                 <div
-                  class="course-block"
+                  class="course-block${course.pending_teacher ? " pending-teacher-block" : ""}"
                   data-course-id="${escapeHtml(
                     course.id
                   )}"
@@ -4370,6 +4459,25 @@ function renderEditPage({
 
                   </div>
 
+                  <!-- Pending Teacher reminder -->
+
+                  <div class="pending-teacher-control">
+                    <button
+                      type="button"
+                      class="pending-teacher-button${course.pending_teacher ? " is-pending" : ""}"
+                      onclick="togglePendingTeacher(
+                        this,
+                        ${Number(course.id)},
+                        '${escapeJsString(formatDate(day.date))}',
+                        ${course.pending_teacher ? "false" : "true"}
+                      )"
+                    >
+                      ${course.pending_teacher
+                        ? "✓ Pending Teacher — Clear"
+                        : "＋ Mark Pending Teacher"}
+                    </button>
+                  </div>
+                  
                   ${leaveWarningHtml}
 
                   ${workingDayWarningHtml}
@@ -4629,7 +4737,53 @@ function renderEditPage({
 
       const exceptionCourseData =
         ${coursesJson};
+      
+        async function togglePendingTeacher(
+        button,
+        courseId,
+        classDate,
+        pending
+      ) {
+        button.disabled = true;
 
+        try {
+          const response = await fetch(
+            "/toggle-pending-teacher",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({
+                course_id: courseId,
+                class_date: classDate,
+                pending: pending
+              })
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              "Failed to save Pending Teacher status."
+            );
+          }
+
+          const currentUrl = new URL(
+            window.location.href
+          );
+
+          window.location.href = currentUrl.href;
+
+        } catch (error) {
+          console.error(error);
+
+          alert(
+            "Could not update Pending Teacher status. Please try again."
+          );
+
+          button.disabled = false;
+        }
+      }
       function goToDate() {
 
         const datePicker =
