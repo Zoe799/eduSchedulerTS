@@ -1173,7 +1173,24 @@ export async function handleEdit(request: Request, env: Env): Promise<Response> 
           ) {
             continue;
           }
+          
+          // On leave today
 
+          const leaves =
+            teacherLeaveMap.get(teacherId) || [];
+
+          const dateString =
+            formatDate(day.date);
+
+          const isOnLeave =
+            leaves.some((leave: any) =>
+              dateString >= leave.start_date &&
+              dateString <= leave.end_date
+            );
+
+          if (isOnLeave) {
+            continue;
+          }
 
           // Working days
 
@@ -4477,7 +4494,7 @@ function renderEditPage({
                         : "＋ Mark Pending Teacher"}
                     </button>
                   </div>
-                  
+
                   ${leaveWarningHtml}
 
                   ${workingDayWarningHtml}
